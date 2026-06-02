@@ -261,9 +261,9 @@ with st.sidebar:
             current_section = section
         is_active = st.session_state.page == name
         active_cls = "active" if is_active else ""
+        btn_label = f"{icon}  {name}\n{desc}"
         if st.button(
-            f"{icon}  {name}
-{desc}",
+            btn_label,
             key=f"nav_{name}",
             use_container_width=True,
             type="primary" if is_active else "secondary",
