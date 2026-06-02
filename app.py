@@ -96,8 +96,30 @@ html, body, [class*="css"] {
 [data-testid="stSidebar"] {
     background: #13161D !important;
     border-right: 1px solid #2A2E3D;
+    min-width: 300px !important;
+    max-width: 300px !important;
 }
-[data-testid="stSidebar"] .css-1d391kg { padding: 1rem; }
+section[data-testid="stSidebar"] > div {
+    padding: 1rem !important;
+}
+.nav-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: #1A1E28;
+    border: 1px solid #2A2E3D;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 6px;
+    transition: all .15s;
+}
+.nav-card:hover { border-color: #4F8EF7; background: rgba(79,142,247,0.06); }
+.nav-card.active { border-color: #4F8EF7; background: rgba(79,142,247,0.10); border-left: 3px solid #4F8EF7; }
+.nav-card-icon { font-size: 22px; line-height: 1; flex-shrink: 0; margin-top: 2px; }
+.nav-card-title { font-size: 13px; font-weight: 600; color: #E8EAF0; margin-bottom: 2px; font-family: Syne, sans-serif; }
+.nav-card.active .nav-card-title { color: #4F8EF7; }
+.nav-card-desc { font-size: 11px; color: #5A6280; line-height: 1.4; }
+.nav-sec-lbl { font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #3A4060; padding: 10px 4px 4px; }
 
 /* CARDS */
 .info-card {
@@ -151,6 +173,35 @@ div[data-testid="stForm"] { background: #13161D; border: 1px solid #2A2E3D; bord
 }
 
 hr { border-color: #2A2E3D !important; }
+
+/* NAV BUTTONS SIDEBAR */
+[data-testid="stSidebar"] .stButton > button {
+    background: #1A1E28 !important;
+    border: 1px solid #2A2E3D !important;
+    border-radius: 10px !important;
+    color: #9BA3BC !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    text-align: left !important;
+    padding: 12px 14px !important;
+    margin-bottom: 4px !important;
+    white-space: pre-wrap !important;
+    height: auto !important;
+    min-height: 60px !important;
+    line-height: 1.5 !important;
+}
+[data-testid="stSidebar"] .stButton > button:hover {
+    border-color: #4F8EF7 !important;
+    background: rgba(79,142,247,0.06) !important;
+    color: #E8EAF0 !important;
+}
+[data-testid="stSidebar"] .stButton > button[kind="primary"] {
+    background: rgba(79,142,247,0.12) !important;
+    border: 1px solid #4F8EF7 !important;
+    border-left: 3px solid #4F8EF7 !important;
+    color: #4F8EF7 !important;
+    box-shadow: none !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -172,47 +223,71 @@ def fmt_e(v): return f"€ {v:,.0f}".replace(",", ".")
 def fmt_pct(v): return f"{v:.1f}%"
 
 # ── SIDEBAR ──
+PAGES = [
+    ("📊", "Dashboard",       "Panoramica flotte, premi e scadenze",         "principale"),
+    ("🚛", "Flotte",          "Aggiungi e gestisci l'anagrafica veicoli",     "principale"),
+    ("⚠️", "Sinistri",        "Registra sinistri per targa e veicolo",        "principale"),
+    ("📤", "Importazione",    "Carica dati da Excel o CSV",                   "principale"),
+    ("🧮", "Calcolo Premi",   "Tariffazione RCA, F&I, franchigie e tasse",    "attuariale"),
+    ("📈", "Modello GLM",     "Frequenza, severità e relativities",           "attuariale"),
+    ("🔺", "Triangoli IBNR",  "Chain Ladder e stima riserve sinistri",        "attuariale"),
+    ("⭐", "Credibilità",     "Experience rating Bühlmann-Straub",            "attuariale"),
+    ("📉", "Grafici",         "Grafici interattivi su premi e sinistri",      "output"),
+    ("📄", "Report",          "Report PDF e export Excel del portafoglio",    "output"),
+]
+
+if "page" not in st.session_state:
+    st.session_state.page = "Dashboard"
+
 with st.sidebar:
     st.markdown("""
-    <div style='text-align:center;padding:16px 0 8px'>
-      <div style='font-family:Syne;font-size:20px;font-weight:700;
+    <div style='text-align:center;padding:16px 0 12px'>
+      <div style='font-size:32px'>🛡️</div>
+      <div style='font-family:Syne;font-size:18px;font-weight:700;
         background:linear-gradient(90deg,#4F8EF7,#7C5CFC);
-        -webkit-background-clip:text;-webkit-text-fill-color:transparent'>
-        🛡️ ActuarialFleet
+        -webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-top:4px'>
+        ActuarialFleet
       </div>
-      <div style='font-size:11px;color:#5A6280;margin-top:4px'>v2.0 · Piattaforma RCA Flotte</div>
+      <div style='font-size:11px;color:#5A6280;margin-top:3px'>v2.0 · Piattaforma RCA Flotte</div>
     </div>
-    <hr>
+    <hr style='border-color:#2A2E3D;margin:0 0 8px'>
     """, unsafe_allow_html=True)
 
-    PAGE = st.radio("", [
-        "📊 Dashboard",
-        "🚛 Flotte",
-        "⚠️ Sinistri",
-        "📤 Importazione",
-        "🧮 Calcolo Premi",
-        "📈 Modello GLM",
-        "🔺 Triangoli IBNR",
-        "⭐ Credibilità",
-        "📉 Grafici",
-        "📄 Report",
-    ], label_visibility="collapsed")
+    current_section = ""
+    for icon, name, desc, section in PAGES:
+        if section != current_section:
+            labels = {"principale": "⬡ Principale", "attuariale": "⬡ Attuariale", "output": "⬡ Output"}
+            st.markdown(f"<div class='nav-sec-lbl'>{labels[section]}</div>", unsafe_allow_html=True)
+            current_section = section
+        is_active = st.session_state.page == name
+        active_cls = "active" if is_active else ""
+        if st.button(
+            f"{icon}  {name}
+{desc}",
+            key=f"nav_{name}",
+            use_container_width=True,
+            type="primary" if is_active else "secondary",
+        ):
+            st.session_state.page = name
+            st.rerun()
 
-    st.markdown("<hr>", unsafe_allow_html=True)
+    st.markdown("<hr style='border-color:#2A2E3D;margin:8px 0'>", unsafe_allow_html=True)
     flotte_df = get_flotte()
     st.markdown(f"""
-    <div style='font-size:11px;color:#5A6280;padding:8px 0'>
-      <div>🚛 <b style='color:#9BA3BC'>{len(flotte_df)}</b> flotte</div>
-      <div>🚗 <b style='color:#9BA3BC'>{int(flotte_df['nveic'].sum()) if not flotte_df.empty else 0}</b> veicoli</div>
-      <div style='margin-top:8px;font-size:10px'>Dati salvati in SQLite locale</div>
+    <div style='font-size:12px;color:#5A6280;padding:4px 0;line-height:1.8'>
+      🚛 <b style='color:#9BA3BC'>{len(flotte_df)}</b> flotte &nbsp;·&nbsp;
+      🚗 <b style='color:#9BA3BC'>{int(flotte_df['nveic'].sum()) if not flotte_df.empty else 0}</b> veicoli
+      <div style='margin-top:6px;font-size:10px'>💾 Dati salvati in SQLite locale</div>
     </div>
     """, unsafe_allow_html=True)
+
+PAGE = st.session_state.page
 
 
 # ══════════════════════════════════════════════
 # DASHBOARD
 # ══════════════════════════════════════════════
-if PAGE == "📊 Dashboard":
+if PAGE == "Dashboard":
     st.markdown("""
     <div class='main-header'>
       <div style='font-size:32px'>📊</div>
@@ -319,7 +394,7 @@ if PAGE == "📊 Dashboard":
 # ══════════════════════════════════════════════
 # FLOTTE
 # ══════════════════════════════════════════════
-elif PAGE == "🚛 Flotte":
+elif PAGE == "Flotte":
     st.markdown("""
     <div class='main-header'>
       <div style='font-size:32px'>🚛</div>
@@ -404,7 +479,7 @@ elif PAGE == "🚛 Flotte":
 # ══════════════════════════════════════════════
 # SINISTRI
 # ══════════════════════════════════════════════
-elif PAGE == "⚠️ Sinistri":
+elif PAGE == "Sinistri":
     st.markdown("""
     <div class='main-header'>
       <div style='font-size:32px'>⚠️</div>
@@ -501,7 +576,7 @@ elif PAGE == "⚠️ Sinistri":
 # ══════════════════════════════════════════════
 # IMPORTAZIONE
 # ══════════════════════════════════════════════
-elif PAGE == "📤 Importazione":
+elif PAGE == "Importazione":
     st.markdown("""
     <div class='main-header'>
       <div style='font-size:32px'>📤</div>
@@ -587,7 +662,7 @@ elif PAGE == "📤 Importazione":
 # ══════════════════════════════════════════════
 # CALCOLO PREMI
 # ══════════════════════════════════════════════
-elif PAGE == "🧮 Calcolo Premi":
+elif PAGE == "Calcolo Premi":
     st.markdown("""
     <div class='main-header'>
       <div style='font-size:32px'>🧮</div>
@@ -742,7 +817,7 @@ elif PAGE == "🧮 Calcolo Premi":
 # ══════════════════════════════════════════════
 # GLM
 # ══════════════════════════════════════════════
-elif PAGE == "📈 Modello GLM":
+elif PAGE == "Modello GLM":
     st.markdown("""
     <div class='main-header'>
       <div style='font-size:32px'>📈</div>
@@ -802,7 +877,7 @@ elif PAGE == "📈 Modello GLM":
 # ══════════════════════════════════════════════
 # TRIANGOLI IBNR
 # ══════════════════════════════════════════════
-elif PAGE == "🔺 Triangoli IBNR":
+elif PAGE == "Triangoli IBNR":
     st.markdown("""
     <div class='main-header'>
       <div style='font-size:32px'>🔺</div>
@@ -875,7 +950,7 @@ elif PAGE == "🔺 Triangoli IBNR":
 # ══════════════════════════════════════════════
 # CREDIBILITÀ
 # ══════════════════════════════════════════════
-elif PAGE == "⭐ Credibilità":
+elif PAGE == "Credibilità":
     st.markdown("""
     <div class='main-header'>
       <div style='font-size:32px'>⭐</div>
@@ -955,7 +1030,7 @@ elif PAGE == "⭐ Credibilità":
 # ══════════════════════════════════════════════
 # GRAFICI
 # ══════════════════════════════════════════════
-elif PAGE == "📉 Grafici":
+elif PAGE == "Grafici":
     st.markdown("""
     <div class='main-header'>
       <div style='font-size:32px'>📉</div>
@@ -1057,7 +1132,7 @@ elif PAGE == "📉 Grafici":
 # ══════════════════════════════════════════════
 # REPORT
 # ══════════════════════════════════════════════
-elif PAGE == "📄 Report":
+elif PAGE == "Report":
     st.markdown("""
     <div class='main-header'>
       <div style='font-size:32px'>📄</div>
